@@ -247,3 +247,19 @@ details[open] summary ~ * {
   0%    {opacity: 0; transform: translateY(-10px)}
   100%  {opacity: 1; transform: translateY(0)}
 }
+
+/* Custom Scrollbar for Pinky Theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ffc7dd;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ffafcc;
+}

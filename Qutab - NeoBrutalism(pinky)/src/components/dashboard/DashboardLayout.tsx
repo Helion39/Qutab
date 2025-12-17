@@ -18,16 +18,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f7f8f6] dark:bg-[#182210]">
+    <div className="flex h-screen overflow-hidden bg-[#fffbef] dark:bg-[#2d1b24]">
       {/* Sidebar */}
-      <aside className="w-72 bg-white dark:bg-[#23301a] border-r border-gray-200 dark:border-gray-800 flex flex-col flex-shrink-0 z-20 h-full">
+      <aside className="w-72 bg-white dark:bg-[#3d2531] border-r border-gray-100 dark:border-gray-800 flex flex-col flex-shrink-0 z-20 h-full">
         {/* Brand / Logo Area */}
         <div className="p-6 flex items-center gap-3">
-          <div className="size-10 rounded-xl bg-[#6dec13] flex items-center justify-center text-[#131b0d]">
+          <div className="size-10 rounded-xl bg-[#ffafcc] flex items-center justify-center text-white">
             <MaterialIcon icon="volunteer_activism" className="filled text-2xl" />
           </div>
           <div>
-            <h1 className="font-bold text-lg tracking-tight text-[#131b0d] dark:text-white leading-tight">
+            <h1 className="font-bold text-lg tracking-tight text-[#4a2c3a] dark:text-white leading-tight">
               Qurban<br />Tanpa Batas
             </h1>
           </div>
@@ -37,86 +37,86 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <nav className="flex-1 px-4 py-4 flex flex-col gap-2 overflow-y-auto">
           <Link
             to="/dashboard"
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors group ${
               isActive('/dashboard')
-                ? 'bg-[#6dec13]/20 text-[#131b0d] dark:text-white font-semibold'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
+                ? 'bg-[#ffe1ed] dark:bg-[#ffafcc]/20 text-[#ef9bb8] dark:text-white font-semibold'
+                : 'hover:bg-[#ffe1ed] dark:hover:bg-gray-800 text-[#7d5a6a] dark:text-gray-300'
             }`}
           >
             <MaterialIcon
               icon="dashboard"
-              className={isActive('/dashboard') ? 'filled text-[#5bc710] dark:text-[#6dec13]' : ''}
+              className={isActive('/dashboard') ? 'filled text-[#ffafcc] dark:text-[#ffafcc]' : 'group-hover:text-[#ffafcc]'}
             />
-            <span className="text-sm">Dashboard</span>
+            <span className="font-medium text-sm">Dasbor</span>
           </Link>
 
           <Link
             to="/dashboard/catalogue"
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors group ${
               isActive('/dashboard/catalogue')
-                ? 'bg-[#6dec13]/20 text-[#131b0d] dark:text-white font-semibold'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
+                ? 'bg-[#ffe1ed] dark:bg-[#ffafcc]/20 text-[#ef9bb8] dark:text-white font-semibold'
+                : 'hover:bg-[#ffe1ed] dark:hover:bg-gray-800 text-[#7d5a6a] dark:text-gray-300'
             }`}
           >
             <MaterialIcon
               icon="storefront"
-              className={isActive('/dashboard/catalogue') ? 'filled text-[#5bc710] dark:text-[#6dec13]' : ''}
+              className={isActive('/dashboard/catalogue') ? 'filled text-[#ffafcc] dark:text-[#ffafcc]' : 'group-hover:text-[#ffafcc]'}
             />
-            <span className="text-sm">Product Catalog</span>
+            <span className="font-medium text-sm">Katalog Produk</span>
           </Link>
 
           <Link
             to="/dashboard/wishlist"
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors group ${
               isActive('/dashboard/wishlist')
-                ? 'bg-[#6dec13]/20 text-[#131b0d] dark:text-white font-semibold'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
+                ? 'bg-[#ffe1ed] dark:bg-[#ffafcc]/20 text-[#ef9bb8] dark:text-white font-semibold'
+                : 'hover:bg-[#ffe1ed] dark:hover:bg-gray-800 text-[#7d5a6a] dark:text-gray-300'
             }`}
           >
             <MaterialIcon
               icon="favorite"
-              className={isActive('/dashboard/wishlist') ? 'filled text-[#5bc710] dark:text-[#6dec13]' : ''}
+              className={isActive('/dashboard/wishlist') ? 'filled text-[#ffafcc] dark:text-[#ffafcc]' : 'group-hover:text-[#ffafcc]'}
             />
-            <span className="text-sm">Wishlist</span>
+            <span className="font-medium text-sm">Daftar Keinginan</span>
           </Link>
 
           <Link
             to="/dashboard/payment"
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors group ${
               isActive('/dashboard/payment')
-                ? 'bg-[#6dec13]/20 text-[#131b0d] dark:text-white font-semibold'
-                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
+                ? 'bg-[#ffe1ed] dark:bg-[#ffafcc]/20 text-[#ef9bb8] dark:text-white font-semibold'
+                : 'hover:bg-[#ffe1ed] dark:hover:bg-gray-800 text-[#7d5a6a] dark:text-gray-300'
             }`}
           >
             <MaterialIcon
               icon="receipt_long"
-              className={isActive('/dashboard/payment') ? 'filled text-[#5bc710] dark:text-[#6dec13]' : ''}
+              className={isActive('/dashboard/payment') ? 'filled text-[#ffafcc] dark:text-[#ffafcc]' : 'group-hover:text-[#ffafcc]'}
             />
-            <span className="text-sm">My Qurban / Payments</span>
+            <span className="font-medium text-sm">Qurban Saya / Pembayaran</span>
           </Link>
 
           <div className="mt-6 px-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Settings</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Pengaturan</p>
             <a
               href="#"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors group"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#ffe1ed] dark:hover:bg-gray-800 text-[#7d5a6a] dark:text-gray-300 transition-colors group"
             >
-              <MaterialIcon icon="settings" className="group-hover:text-[#6dec13]" />
-              <span className="text-sm">Account Settings</span>
+              <MaterialIcon icon="settings" className="group-hover:text-[#ffafcc]" />
+              <span className="font-medium text-sm">Pengaturan Akun</span>
             </a>
             <a
               href="#"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors group"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#ffe1ed] dark:hover:bg-gray-800 text-[#7d5a6a] dark:text-gray-300 transition-colors group"
             >
-              <MaterialIcon icon="help" className="group-hover:text-[#6dec13]" />
-              <span className="text-sm">Help Center</span>
+              <MaterialIcon icon="help" className="group-hover:text-[#ffafcc]" />
+              <span className="font-medium text-sm">Pusat Bantuan</span>
             </a>
           </div>
         </nav>
 
         {/* User Profile Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-black/20">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-[#fffbef] dark:bg-black/20">
+          <a href="#" className="flex items-center gap-3 mb-4 hover:bg-white/50 dark:hover:bg-white/5 p-2 rounded-lg transition-colors">
             <div
               className="size-10 rounded-full bg-cover bg-center border-2 border-white dark:border-gray-700 shadow-sm"
               style={{
@@ -125,16 +125,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               }}
             ></div>
             <div className="flex flex-col overflow-hidden">
-              <p className="text-sm font-bold text-[#131b0d] dark:text-white truncate">Ahmad Fulan</p>
-              <p className="text-xs text-[#5bc710] dark:text-[#6dec13] font-medium">Gold Donor</p>
+              <p className="text-sm font-bold text-[#4a2c3a] dark:text-white truncate">Ahmad Fulan</p>
+              <p className="text-xs text-[#ffafcc] dark:text-[#ffafcc] font-medium">Donatur Emas</p>
             </div>
-          </div>
+          </a>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 h-10 bg-white dark:bg-[#23301a] border border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 text-red-600 dark:text-red-400 rounded-lg text-sm font-semibold transition-all"
+            className="w-full flex items-center justify-center gap-2 h-10 bg-white dark:bg-[#3d2531] border border-gray-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 text-red-400 dark:text-red-400 rounded-lg text-sm font-semibold transition-all"
           >
             <MaterialIcon icon="logout" className="text-[18px]" />
-            Log Out
+            Keluar
           </button>
         </div>
       </aside>
@@ -142,38 +142,40 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Top Header */}
-        <header className="h-20 px-8 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-[#182210]/80 backdrop-blur-md sticky top-0 z-10">
+        <header className="h-20 px-8 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-[#2d1b24]/80 backdrop-blur-md sticky top-0 z-10">
           {/* Breadcrumbs / Title */}
           <div className="flex flex-col">
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <span>Home</span>
+            <div className="flex items-center gap-2 text-sm text-[#7d5a6a] dark:text-gray-400">
+              <a href="#" className="hover:text-[#ffafcc] transition-colors">Beranda</a>
               <MaterialIcon icon="chevron_right" className="text-[14px]" />
-              <span className="text-[#131b0d] dark:text-white font-medium">
-                {location.pathname === '/dashboard' && 'Dashboard'}
-                {location.pathname === '/dashboard/catalogue' && 'Catalog'}
-                {location.pathname === '/dashboard/wishlist' && 'Wishlist'}
-                {location.pathname === '/dashboard/payment' && 'Payments'}
+              <span className="text-[#4a2c3a] dark:text-white font-medium">
+                {location.pathname === '/dashboard' && 'Dasbor'}
+                {location.pathname === '/dashboard/catalogue' && 'Katalog'}
+                {location.pathname === '/dashboard/wishlist' && 'Daftar Keinginan'}
+                {location.pathname === '/dashboard/payment' && 'Pembayaran'}
               </span>
             </div>
           </div>
 
           {/* Search & Actions */}
           <div className="flex items-center gap-4">
-            <div className="relative w-80 hidden md:block">
-              <MaterialIcon icon="search" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="relative w-80 hidden md:block group">
+              <button className="absolute left-3 top-1/2 -translate-y-1/2 text-[#bdbef5] hover:text-[#ffafcc] transition-colors">
+                <MaterialIcon icon="search" />
+              </button>
               <input
-                className="w-full pl-10 pr-4 h-10 rounded-lg bg-[#f7f8f6] dark:bg-[#23301a] border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#6dec13]/50 text-sm text-[#131b0d] dark:text-white placeholder-gray-400"
-                placeholder="Search animals (e.g., Goat Type A)..."
+                className="w-full pl-10 pr-4 h-10 rounded-lg bg-[#ffe1ed]/30 dark:bg-[#3d2531] border border-transparent focus:bg-white focus:border-[#bdbef5] dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#bdbef5]/50 text-sm text-[#4a2c3a] dark:text-white placeholder-[#7d5a6a]/50 transition-all"
+                placeholder="Cari hewan (misal: Kambing Tipe A)..."
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <button className="size-10 rounded-full bg-white dark:bg-[#23301a] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative">
+            <button className="size-10 rounded-full bg-white dark:bg-[#3d2531] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-[#7d5a6a] dark:text-gray-300 hover:bg-[#ffe1ed] dark:hover:bg-gray-800 transition-colors relative">
               <MaterialIcon icon="notifications" />
-              <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white dark:border-[#23301a]"></span>
+              <span className="absolute top-2 right-2 size-2 bg-[#ffafcc] rounded-full border border-white dark:border-[#3d2531]"></span>
             </button>
-            <button className="size-10 rounded-full bg-white dark:bg-[#23301a] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <button className="size-10 rounded-full bg-white dark:bg-[#3d2531] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-[#7d5a6a] dark:text-gray-300 hover:bg-[#ffe1ed] dark:hover:bg-gray-800 transition-colors">
               <MaterialIcon icon="shopping_cart" />
             </button>
           </div>

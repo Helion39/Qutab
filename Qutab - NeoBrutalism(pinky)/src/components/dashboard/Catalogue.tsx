@@ -101,34 +101,33 @@ export default function Catalogue() {
 
   const getBadgeColors = (color: string) => {
     const colors: Record<string, string> = {
-      green: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
-      amber: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-      blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-      purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
-      gray: 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+      green: 'bg-[#dfdffa] dark:bg-[#bdbef5]/30 text-[#bdbef5] dark:text-[#dfdffa]',
+      amber: 'bg-[#ffc7dd] dark:bg-[#ffafcc]/30 text-[#ef9bb8] dark:text-[#ffc7dd]',
+      blue: 'bg-[#bdbef5] dark:bg-[#bdbef5]/30 text-white dark:text-[#dfdffa]',
+      purple: 'bg-[#dfdffa] dark:bg-[#bdbef5]/30 text-[#bdbef5] dark:text-[#dfdffa]',
+      gray: 'bg-gray-100 dark:bg-gray-800 text-gray-400'
     };
     return colors[color] || colors.green;
   };
 
   return (
-    <div className="p-8 pb-20">
+    <div className="p-8 pb-20 bg-[#fffbef] dark:bg-[#2d1b24]">
       <div className="max-w-6xl mx-auto flex flex-col gap-8">
         {/* Page Heading */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div className="flex flex-col gap-2">
-            <h2 className="text-3xl font-bold text-[#131b0d] dark:text-white tracking-tight">
-              Qurban Catalog 2024
+            <h2 className="text-3xl font-bold text-[#4a2c3a] dark:text-white tracking-tight">
+              Katalog Qurban 2024
             </h2>
-            <p className="text-[#6c9a4c] dark:text-gray-400 max-w-2xl">
-              Select your sacrifice animal from trusted local farmers. All animals are health-checked and
-              sharia-compliant.
+            <p className="text-[#7d5a6a] dark:text-gray-400 max-w-2xl">
+              Pilih hewan kurban Anda dari peternak lokal terpercaya. Semua hewan diperiksa kesehatannya dan sesuai syariah.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-white dark:bg-[#23301a] px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">BALANCE:</span>
-            <span className="text-sm font-bold text-[#131b0d] dark:text-white">Rp 5.250.000</span>
-            <button className="size-6 bg-[#6dec13] rounded flex items-center justify-center hover:bg-[#5bc710] transition-colors">
-              <MaterialIcon icon="add" className="text-[16px] text-[#131b0d]" />
+          <div className="flex items-center gap-2 bg-white dark:bg-[#3d2531] px-3 py-1.5 rounded-lg border border-[#bdbef5]/20 dark:border-gray-700 shadow-sm">
+            <span className="text-xs font-semibold text-[#7d5a6a] dark:text-gray-400">SALDO:</span>
+            <span className="text-sm font-bold text-[#4a2c3a] dark:text-white">Rp 5.250.000</span>
+            <button className="size-6 bg-[#ffafcc] rounded flex items-center justify-center hover:bg-[#ef9bb8] transition-colors text-white">
+              <MaterialIcon icon="add" className="text-[16px]" />
             </button>
           </div>
         </div>
@@ -137,47 +136,47 @@ export default function Catalogue() {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setActiveFilter('all')}
-            className={`h-9 px-4 rounded-lg font-bold text-sm shadow-sm transition-all flex items-center gap-2 ${
+            className={`h-9 px-4 rounded-lg font-bold text-sm shadow-sm transition-all flex items-center gap-2 ring-2 ring-offset-1 ring-transparent focus:ring-[#ffafcc]/50 ${
               activeFilter === 'all'
-                ? 'bg-[#6dec13] text-[#131b0d]'
-                : 'bg-white dark:bg-[#23301a] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#6dec13] hover:text-[#6dec13]'
+                ? 'bg-[#ffafcc] text-white'
+                : 'bg-white dark:bg-[#3d2531] border border-gray-200 dark:border-gray-700 text-[#7d5a6a] dark:text-gray-300 hover:border-[#ffafcc] hover:text-[#ffafcc]'
             }`}
           >
             <MaterialIcon icon="grid_view" className="text-[18px]" />
-            All Animals
+            Semua Hewan
           </button>
           <button
             onClick={() => setActiveFilter('goats')}
-            className={`h-9 px-4 rounded-lg font-medium text-sm transition-all flex items-center gap-2 group ${
+            className={`h-9 px-4 rounded-lg font-medium text-sm transition-all flex items-center gap-2 group focus:ring-2 focus:ring-[#ffafcc]/30 ${
               activeFilter === 'goats'
-                ? 'bg-[#6dec13] text-[#131b0d]'
-                : 'bg-white dark:bg-[#23301a] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#6dec13] hover:text-[#6dec13]'
+                ? 'bg-[#ffafcc] text-white'
+                : 'bg-white dark:bg-[#3d2531] border border-gray-200 dark:border-gray-700 text-[#7d5a6a] dark:text-gray-300 hover:border-[#ffafcc] hover:text-[#ffafcc]'
             }`}
           >
-            <MaterialIcon icon="cruelty_free" className="text-[18px] group-hover:text-[#6dec13]" />
-            Goats / Sheep
+            <MaterialIcon icon="cruelty_free" className="text-[18px] group-hover:text-[#ffafcc]" />
+            Kambing / Domba
           </button>
           <button
             onClick={() => setActiveFilter('cows-whole')}
-            className={`h-9 px-4 rounded-lg font-medium text-sm transition-all flex items-center gap-2 group ${
+            className={`h-9 px-4 rounded-lg font-medium text-sm transition-all flex items-center gap-2 group focus:ring-2 focus:ring-[#ffafcc]/30 ${
               activeFilter === 'cows-whole'
-                ? 'bg-[#6dec13] text-[#131b0d]'
-                : 'bg-white dark:bg-[#23301a] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#6dec13] hover:text-[#6dec13]'
+                ? 'bg-[#ffafcc] text-white'
+                : 'bg-white dark:bg-[#3d2531] border border-gray-200 dark:border-gray-700 text-[#7d5a6a] dark:text-gray-300 hover:border-[#ffafcc] hover:text-[#ffafcc]'
             }`}
           >
-            <MaterialIcon icon="grass" className="text-[18px] group-hover:text-[#6dec13]" />
-            Cows (Whole)
+            <MaterialIcon icon="grass" className="text-[18px] group-hover:text-[#ffafcc]" />
+            Sapi (Utuh)
           </button>
           <button
             onClick={() => setActiveFilter('cows-share')}
-            className={`h-9 px-4 rounded-lg font-medium text-sm transition-all flex items-center gap-2 group ${
+            className={`h-9 px-4 rounded-lg font-medium text-sm transition-all flex items-center gap-2 group focus:ring-2 focus:ring-[#ffafcc]/30 ${
               activeFilter === 'cows-share'
-                ? 'bg-[#6dec13] text-[#131b0d]'
-                : 'bg-white dark:bg-[#23301a] border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#6dec13] hover:text-[#6dec13]'
+                ? 'bg-[#ffafcc] text-white'
+                : 'bg-white dark:bg-[#3d2531] border border-gray-200 dark:border-gray-700 text-[#7d5a6a] dark:text-gray-300 hover:border-[#ffafcc] hover:text-[#ffafcc]'
             }`}
           >
-            <MaterialIcon icon="pie_chart" className="text-[18px] group-hover:text-[#6dec13]" />
-            Cow Share (1/7)
+            <MaterialIcon icon="pie_chart" className="text-[18px] group-hover:text-[#ffafcc]" />
+            Patungan Sapi (1/7)
           </button>
         </div>
 
@@ -186,38 +185,39 @@ export default function Catalogue() {
           {products.map((product) => (
             <div
               key={product.id}
-              className={`group bg-white dark:bg-[#23301a] rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-[#6dec13]/50 transition-all duration-300 flex flex-col ${
+              className={`group bg-white dark:bg-[#3d2531] rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-[#ffafcc]/50 transition-all duration-300 flex flex-col relative ${
                 !product.inStock ? 'opacity-75' : ''
               }`}
             >
-              <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800">
-                <ImageWithFallback
-                  src={product.image}
-                  alt={product.name}
-                  className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${
-                    !product.inStock ? 'grayscale' : ''
-                  }`}
-                />
+              <div className="relative aspect-[4/3] overflow-hidden bg-[#dfdffa] dark:bg-gray-800">
+                <a href="#" className="block w-full h-full">
+                  <div
+                    className={`absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110 ${
+                      !product.inStock ? 'grayscale' : ''
+                    }`}
+                    style={{ backgroundImage: `url('${product.image}')` }}
+                  ></div>
+                </a>
 
                 {/* Badge */}
                 {product.badge === 'verified' && (
-                  <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
-                    <MaterialIcon icon="verified" className="text-[14px] text-green-600" />
-                    <span className="text-xs font-bold text-gray-800 dark:text-white">Verified Farmer</span>
+                  <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/80 backdrop-blur px-2 py-1 rounded-md flex items-center gap-1 shadow-sm pointer-events-none">
+                    <MaterialIcon icon="verified" className="text-[14px] text-[#bdbef5]" />
+                    <span className="text-xs font-bold text-gray-800 dark:text-white">Peternak Terverifikasi</span>
                   </div>
                 )}
                 {product.badge === 'bestseller' && (
-                  <div className="absolute top-3 left-3 bg-amber-100/90 dark:bg-amber-900/80 backdrop-blur px-2 py-1 rounded-md flex items-center gap-1 shadow-sm border border-amber-200 dark:border-amber-800">
-                    <MaterialIcon icon="star" className="text-[14px] text-amber-600 dark:text-amber-400" />
-                    <span className="text-xs font-bold text-amber-800 dark:text-amber-200">Best Seller</span>
+                  <div className="absolute top-3 left-3 bg-[#ffc7dd]/90 dark:bg-[#ef9bb8]/80 backdrop-blur px-2 py-1 rounded-md flex items-center gap-1 shadow-sm border border-[#ffafcc]/20 dark:border-[#ef9bb8]/50 pointer-events-none">
+                    <MaterialIcon icon="star" className="text-[14px] text-[#ef9bb8] dark:text-white" />
+                    <span className="text-xs font-bold text-[#ef9bb8] dark:text-white">Paling Laris</span>
                   </div>
                 )}
 
                 {/* Out of Stock Overlay */}
                 {!product.inStock && (
                   <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center">
-                    <span className="bg-black/70 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                      Out of Stock
+                    <span className="bg-black/70 text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wide">
+                      Stok Habis
                     </span>
                   </div>
                 )}
@@ -225,28 +225,27 @@ export default function Catalogue() {
                 {/* Favorite Button */}
                 <button
                   onClick={() => toggleFavorite(product.id)}
-                  className="absolute top-3 right-3 size-8 rounded-full bg-white/50 hover:bg-white dark:bg-black/30 dark:hover:bg-black/60 backdrop-blur flex items-center justify-center transition-all text-gray-700 dark:text-white"
+                  className="absolute top-3 right-3 size-8 rounded-full bg-white/50 hover:bg-white dark:bg-black/30 dark:hover:bg-black/60 backdrop-blur flex items-center justify-center transition-all text-gray-700 dark:text-white hover:text-red-500 hover:scale-110 active:scale-95 z-10"
                 >
                   <MaterialIcon
                     icon="favorite"
                     className={`text-[18px] ${
-                      favorites.includes(product.id) ? 'filled text-red-500' : ''
+                      favorites.includes(product.id) ? 'filled text-[#ffafcc]' : ''
                     }`}
                   />
                 </button>
               </div>
 
               <div className="p-4 flex flex-col gap-3 flex-1">
-                <div>
+                <a href="#" className="block group-hover:text-[#ffafcc] transition-colors">
                   <h3
                     className={`font-bold text-lg ${
                       product.inStock
-                        ? 'text-[#131b0d] dark:text-white'
-                        : 'text-gray-500 dark:text-gray-400'
+                        ? 'text-[#4a2c3a] dark:text-white'
+                        : 'text-gray-400 dark:text-gray-500'
                     }`}
                   >
-                    {product.name}
-                  </h3>
+                    {product.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-bold ${getBadgeColors(
@@ -257,16 +256,16 @@ export default function Catalogue() {
                     </span>
                     <span
                       className={`text-sm ${
-                        product.inStock ? 'text-gray-500 dark:text-gray-400' : 'text-gray-400'
+                        product.inStock ? 'text-[#7d5a6a] dark:text-gray-400' : 'text-gray-400'
                       }`}
                     >
                       {product.weight}
                     </span>
                   </div>
-                </div>
+                </a>
                 <div
                   className={`flex items-center gap-2 text-xs ${
-                    product.inStock ? 'text-gray-500 dark:text-gray-400' : 'text-gray-400'
+                    product.inStock ? 'text-[#7d5a6a] dark:text-gray-400' : 'text-gray-400'
                   }`}
                 >
                   <MaterialIcon icon="location_on" className="text-[14px]" />
@@ -274,18 +273,14 @@ export default function Catalogue() {
                 </div>
                 <div className="mt-auto pt-4 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-800">
                   <div className="flex flex-col">
-                    <span
-                      className={`text-xs font-medium ${
-                        product.inStock ? 'text-gray-400' : 'text-gray-400'
-                      }`}
-                    >
-                      Price
+                    <span className="text-xs text-gray-400 font-medium">
+                      Harga
                     </span>
                     <span
                       className={`text-lg font-bold ${
                         product.inStock
-                          ? 'text-[#131b0d] dark:text-white'
-                          : 'text-gray-500 dark:text-gray-400'
+                          ? 'text-[#4a2c3a] dark:text-white'
+                          : 'text-gray-400 dark:text-gray-500'
                       }`}
                     >
                       {product.price}
@@ -293,9 +288,9 @@ export default function Catalogue() {
                   </div>
                   <button
                     disabled={!product.inStock}
-                    className={`h-9 px-4 rounded-lg font-bold text-sm shadow-sm transition-colors flex items-center gap-1.5 ${
+                    className={`h-9 px-4 rounded-lg font-bold text-sm shadow-sm transition-colors flex items-center gap-1.5 active:scale-95 ${
                       product.inStock
-                        ? 'bg-[#6dec13] hover:bg-[#5bc710] text-[#131b0d]'
+                        ? 'bg-[#ffafcc] hover:bg-[#ef9bb8] text-white'
                         : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shadow-none cursor-not-allowed'
                     }`}
                   >
@@ -303,7 +298,7 @@ export default function Catalogue() {
                       icon={product.inStock ? 'add_shopping_cart' : 'block'}
                       className="text-[18px]"
                     />
-                    {product.inStock ? 'Add' : 'Full'}
+                    {product.inStock ? 'Tambah' : 'Penuh'}
                   </button>
                 </div>
               </div>

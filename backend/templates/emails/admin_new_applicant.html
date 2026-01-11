@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: #fff3cd;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .alert {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>⚠️ New Affiliate Applicant</h2>
+        </div>
+        <div class="content">
+            <p>Admin Team,</p>
+            <p>A new user has applied for the Affiliate Program:</p>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Name:</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ user.get_full_name }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Email:</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ user.email }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>WhatsApp:</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.whatsapp }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>City:</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.city }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Primary Platform:</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.get_primary_platform_display
+                        }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Instagram:</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.instagram|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>TikTok:</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.tiktok|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Reason:</strong></td>
+                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.reason }}</td>
+                </tr>
+            </table>
+
+            <p class="alert">Please review and take action:</p>
+
+            <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
+                <!-- Approve Button -->
+                <a href="{{ approve_url }}"
+                    style="padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 15px;">
+                    ✅ APPROVE
+                </a>
+
+                <!-- Reject Button -->
+                <a href="{{ reject_url }}"
+                    style="padding: 12px 24px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    ❌ REJECT
+                </a>
+            </div>
+
+            <p style="text-align: center; font-size: 12px; color: #888;">
+                (These links will expire or become invalid if the status changes)
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

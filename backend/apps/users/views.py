@@ -193,3 +193,24 @@ class AffiliateStatusView(APIView):
                 'status': 'not_found',
                 'error': 'Affiliate profile not found.'
             }, status=status.HTTP_404_NOT_FOUND)
+from django.conf import settings
+
+class MockCleanupView(APIView):
+    """Dev Tool: Clear all test accounts (Superusers/Staff preserved)."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        if not getattr(settings, 'DEBUG', False):
+             return Response({'error': 'Not allowed in production'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Lazy imports to avoid circular deps if any
+        from apps.orders.models import Order
+        from apps.commissions.models import Commission
+        
+        # Cleanup
+        Commission.objects.all().delete()
+        Order.objects.all().delete()
+        # Delete non-staff users
+        deleted_count, _ = User.objects.filter(is_staff=False, is_superuser=False).delete()
+        
+        return Response({'message': f'Cleanup successful! Deleted {deleted_count} test users.'})

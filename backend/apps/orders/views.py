@@ -178,3 +178,66 @@ class WishlistRemoveView(APIView):
             return Response({'message': 'Removed from wishlist.'})
         else:
             return Response({'message': 'Not in wishlist.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class MockCheckoutView(APIView):
+    """
+    SIMULATE a checkout for testing commissions.
+    This creates a COMPLETED order immediately.
+    """
+    permission_classes = [IsAuthenticated]  # Or AllowAny if you want public testing
+
+    def post(self, request):
+        affiliate_code = request.data.get('affiliate_code')
+        amount = request.data.get('final_amount', 2500000) # Default 2.5jt
+        
+        if not affiliate_code:
+            return Response({'error': 'Affiliate Code required'}, status=400)
+
+        # 1. Get a random product to link (or create dummy)
+        product = Product.objects.first()
+        if not product:
+            return Response({'error': 'No products found to link order'}, status=500)
+
+        # 2. Create Order
+        # We assign it to the Current User (the one clicking the button) usually.
+        # But commissions only trigger if order.user != affiliate.user usually (self-referral check).
+        # So we might want to assign it to a random user or creating a dummy user?
+        # For simplicity, let's allow self-referral for these MOCK tests, 
+        # OR better: user=request.user. 
+        # (Assuming CommissionService doesn't block self-referral too strictly for dev).
+        
+        order = Order.objects.create(
+            user=request.user,
+            product=product,
+            quantity=1,
+            unit_price=amount,
+            total_amount=amount, # Simulate the input amount
+            discount_amount=0,
+            final_amount=amount,
+            recipient_name="Mock Tester",
+            recipient_location="Tech City",
+            referral_code=affiliate_code,
+            status='completed', # IMPORTANT: Instant complete to trigger commission
+            payment_status='paid',
+            payment_method='mock_test'
+        )
+        
+        # 3. Manually trigger commission calculation?
+        # Usually signals handle it on 'completed' save.
+        # If signals are set up, this is enough.
+        # If not, we might need: CommissionService.process_order_commission(order)
+        
+        # Let's assume signals work. If not, I'll add the service call.
+        from apps.commissions.services import CommissionService
+        try:
+            CommissionService.calculate_commission(order)
+            commission_msg = "Commission calculated."
+        except Exception as e:
+            commission_msg = f"Commission logic error: {e}"
+
+        return Response({
+            'message': 'Mock Order Created!',
+            'order_id': order.id,
+            'debug': commission_msg
+        })

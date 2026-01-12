@@ -9,6 +9,7 @@ from .views import (
     ProfileView,
     ChangePasswordView,
     AffiliateStatusView,
+    MockCleanupView,
 )
 
 urlpatterns = [
@@ -26,4 +27,7 @@ urlpatterns = [
     path('affiliate/auth/register/', AffiliateRegisterView.as_view(), name='affiliate-register'),
     path('affiliate/auth/login/', LoginView.as_view(), name='affiliate-login'),  # Same as customer
     path('affiliate/status/', AffiliateStatusView.as_view(), name='affiliate-status'),
+    
+    # Dev Tools
+    path('auth/dev/cleanup/', MockCleanupView.as_view(), name='dev-cleanup'),
 ]

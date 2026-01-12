@@ -29,9 +29,32 @@
         .alert {
             color: #856404;
             background-color: #fff3cd;
-            border-color: #ffeeba;
             padding: 10px;
             border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        td {
+            padding: 8px 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .label {
+            width: 40%;
+            font-weight: bold;
+        }
+
+        h3 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -39,66 +62,97 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>⚠️ New Affiliate Applicant</h2>
+            <h2 style="margin:0; color: #856404;">New Affiliate Applicant</h2>
         </div>
         <div class="content">
             <p>Admin Team,</p>
-            <p>A new user has applied for the Affiliate Program:</p>
+            <p>A new user has applied for the Affiliate Program. Please review the details below:</p>
 
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <h3>01 Personal Information</h3>
+            <table>
                 <tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Name:</strong></td>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ user.get_full_name }}</td>
+                    <td class="label">Name:</td>
+                    <td>{{user.get_full_name}}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Email:</strong></td>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ user.email }}</td>
+                    <td class="label">Email:</td>
+                    <td><a href="mailto:{{user.email}}"
+                            style="color: #007bff; text-decoration: none;">{{user.email}}</a></td>
                 </tr>
                 <tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>WhatsApp:</strong></td>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.whatsapp }}</td>
+                    <td class="label">WhatsApp:</td>
+                    <td><a href="https://wa.me/{{affiliate.whatsapp}}"
+                            style="color: #28a745; text-decoration: none;">{{affiliate.whatsapp}}</a></td>
                 </tr>
                 <tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>City:</strong></td>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.city }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Primary Platform:</strong></td>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.get_primary_platform_display
-                        }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Instagram:</strong></td>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.instagram|default:"-" }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>TikTok:</strong></td>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.tiktok|default:"-" }}</td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;"><strong>Reason:</strong></td>
-                    <td style="padding: 5px; border-bottom: 1px solid #ddd;">{{ affiliate.reason }}</td>
+                    <td class="label">City:</td>
+                    <td>{{affiliate.city}}</td>
                 </tr>
             </table>
 
-            <p class="alert">Please review and take action:</p>
+            <h3>02 Social Media</h3>
+            <table>
+                <tr>
+                    <td class="label">Instagram:</td>
+                    <td>
+                        {% if affiliate.instagram %}
+                        <a href="{{affiliate.instagram}}" target="_blank"
+                            style="color: #007bff;">{{affiliate.instagram}}</a>
+                        {% else %}-{% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">TikTok:</td>
+                    <td>
+                        {% if affiliate.tiktok %}
+                        <a href="{{affiliate.tiktok}}" target="_blank" style="color: #007bff;">{{affiliate.tiktok}}</a>
+                        {% else %}-{% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">YouTube:</td>
+                    <td>
+                        {% if affiliate.youtube %}
+                        <a href="{{affiliate.youtube}}" target="_blank"
+                            style="color: #007bff;">{{affiliate.youtube}}</a>
+                        {% else %}-{% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">Facebook:</td>
+                    <td>
+                        {% if affiliate.facebook %}
+                        <a href="{{affiliate.facebook}}" target="_blank"
+                            style="color: #007bff;">{{affiliate.facebook}}</a>
+                        {% else %}-{% endif %}
+                    </td>
+                </tr>
+            </table>
+
+            <h3>03 Promotion Strategy</h3>
+            <table>
+                <tr>
+                    <td class="label">Primary Platform:</td>
+                    <td>{{affiliate.get_primary_platform_display}}</td>
+                </tr>
+                <tr>
+                    <td class="label">Reason:</td>
+                    <td>{{affiliate.reason}}</td>
+                </tr>
+            </table>
+
+            <p class="alert">Action Required:</p>
 
             <div style="text-align: center; margin-top: 30px; margin-bottom: 30px;">
-                <!-- Approve Button -->
-                <a href="{{ approve_url }}"
-                    style="padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 15px;">
-                    ✅ APPROVE
-                </a>
-
-                <!-- Reject Button -->
-                <a href="{{ reject_url }}"
-                    style="padding: 12px 24px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                    ❌ REJECT
-                </a>
+                <a href="{{approve_url}}"
+                    style="display: inline-block; padding: 14px 28px; background-color: #28a745; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin-right: 15px; border: 1px solid #218838;">APPROVE</a>
+                <a href="{{reject_url}}"
+                    style="display: inline-block; padding: 14px 28px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; border: 1px solid #c82333;">REJECT</a>
             </div>
 
-            <p style="text-align: center; font-size: 12px; color: #888;">
-                (These links will expire or become invalid if the status changes)
+            <p style="text-align: center; font-size: 11px; color: #999;">
+                Note: These secure links are generated for a single use.<br>
+                <a href="{{admin_url}}">View in Admin Panel</a>
             </p>
         </div>
     </div>

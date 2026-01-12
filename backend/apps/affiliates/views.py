@@ -99,6 +99,7 @@ class AffiliateDashboardView(APIView):
             'conversion_rate': round((total_referrals / total_clicks * 100) if total_clicks > 0 else 0, 2),
             'recent_clicks': ReferralClickSerializer(recent_clicks, many=True).data,
             'recent_referrals': ReferralSerializer(recent_referrals, many=True).data,
+            'affiliate_code': affiliate.affiliate_code,
         }
         
         return Response(data)

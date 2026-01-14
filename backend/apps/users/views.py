@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 from .serializers import (
     UserSerializer, 
@@ -15,6 +17,7 @@ from .serializers import (
 User = get_user_model()
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CustomerRegisterView(generics.CreateAPIView):
     """Register a new customer account."""
     
@@ -39,6 +42,7 @@ class CustomerRegisterView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class AffiliateRegisterView(generics.CreateAPIView):
     """Submit affiliate application."""
     
@@ -74,26 +78,30 @@ class AffiliateRegisterView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
-    """Login for both customers and affiliates."""
+    """Login for both customers and affiliates. Accepts username or email param as ID."""
     
     permission_classes = [AllowAny]
     
     def post(self, request):
-        email = request.data.get('email')
+        # Frontend might send 'username' (Admin ID) or 'email'
+        login_identifier = request.data.get('username') or request.data.get('email')
         password = request.data.get('password')
         
-        if not email or not password:
+        if not login_identifier or not password:
             return Response(
-                {'error': 'Email and password are required.'},
+                {'error': 'Admin ID/Email and password are required.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        user = authenticate(request, username=email, password=password)
+        # Authenticate using the identifier. 
+        # Since USERNAME_FIELD = 'email' in models.py, 'username' kwarg here expects the email value.
+        user = authenticate(request, username=login_identifier, password=password)
         
         if user is None:
             return Response(
-                {'error': 'Invalid email or password.'},
+                {'error': 'Invalid Admin ID or password.'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
         
@@ -185,6 +193,7 @@ class AffiliateStatusView(APIView):
             
             return Response({
                 'status': affiliate.status,
+                'affiliate_id': affiliate.id,
                 'affiliate_code': affiliate.affiliate_code,
                 'approved_at': affiliate.approved_at,
             })

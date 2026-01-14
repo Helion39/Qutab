@@ -69,12 +69,14 @@ class Order(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.order_number:
-            # Generate order number: QTB-YYMMDD-XXXX
+            # Generate order number: QTB-YYMMDD-XXXX with microseconds for uniqueness
             from django.utils import timezone
             import random
-            date_str = timezone.now().strftime('%y%m%d')
-            random_str = ''.join([str(random.randint(0, 9)) for _ in range(4)])
-            self.order_number = f"QTB-{date_str}-{random_str}"
+            now = timezone.now()
+            date_str = now.strftime('%y%m%d')
+            # Use microseconds + random for better uniqueness
+            unique_str = f"{now.microsecond:06d}"[-4:] + f"{random.randint(0, 99):02d}"
+            self.order_number = f"QTB-{date_str}-{unique_str}"
         super().save(*args, **kwargs)
 
 

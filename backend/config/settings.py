@@ -1,13 +1,27 @@
-"""
-Django settings for Qutab backend.
-"""
+from dotenv import load_dotenv
 
+load_dotenv()  # Load environment variables from .env file
+
+# ... imports ...
 from pathlib import Path
 from datetime import timedelta
 import os
+import xendit
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# ...
+
+# =============================================================================
+# XENDIT PAYMENT GATEWAY
+# =============================================================================
+XENDIT_API_KEY = os.environ.get('XENDIT_API_KEY')
+XENDIT_CALLBACK_TOKEN = os.environ.get('XENDIT_CALLBACK_TOKEN')
+
+if XENDIT_API_KEY:
+    xendit.api_key = XENDIT_API_KEY
+# =============================================================================
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -16,7 +30,16 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-pro
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1', 
+    'qutab.co.id', 
+    'www.qutab.co.id', 
+    'api.qutab.co.id',
+    'shop.qurbantanpabatas.id',
+    'affiliate.qurbantanpabatas.id',
+    'dash-u28mzk49.qurbantanpabatas.id',
+]
 
 
 # Application definition
@@ -35,11 +58,13 @@ INSTALLED_APPS = [
     'corsheaders',
     
     # Local apps
+    'apps.core',
     'apps.users',
     'apps.products',
     'apps.orders',
     'apps.affiliates',
     'apps.commissions',
+    'apps.payments',
 ]
 
 MIDDLEWARE = [
@@ -130,7 +155,7 @@ SIMPLE_JWT = {
 }
 
 
-# CORS Configuration - Allow frontend during development
+# CORS Configuration - Allow frontend during development and production
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:5173',  # Vite default
@@ -138,6 +163,17 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:3030',
+    'https://qutab.co.id',    # Production frontend
+    'https://www.qutab.co.id', # Production frontend with www
+    'https://shop.qurbantanpabatas.id',
+    'https://affiliate.qurbantanpabatas.id',
+    'https://dash-u28mzk49.qurbantanpabatas.id',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://shop.qurbantanpabatas.id',
+    'https://affiliate.qurbantanpabatas.id',
+    'https://dash-u28mzk49.qurbantanpabatas.id',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -164,7 +200,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Frontend URL (for redirects after payment)
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3030')
+# Environment-aware frontend URL configuration
+if DEBUG:
+    # Development: Use the same host as the request but different port
+    FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3030')
+    BACKEND_URL = os.environ.get('BACKEND_URL', 'http://127.0.0.1:8000')
+else:
+    # Production: Use the production domain
+    FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://qutab.co.id')
+    BACKEND_URL = os.environ.get('BACKEND_URL', 'https://qutab.co.id')
 
 
 # =============================================================================

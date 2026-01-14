@@ -78,10 +78,16 @@ class Affiliate(models.Model):
     
     @property
     def referral_url(self):
-        """Get full referral URL."""
+        """Get full referral URL that goes through backend redirect."""
         from django.conf import settings
-        base_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
-        return f"{base_url}/r/{self.affiliate_code}"
+        
+        if settings.DEBUG:
+            # Development: Use backend URL for redirect
+            return f"http://127.0.0.1:8000/r/{self.affiliate_code}/"
+        else:
+            # Production: Use production backend URL
+            backend_url = getattr(settings, 'BACKEND_URL', 'https://qutab.co.id')
+            return f"{backend_url}/r/{self.affiliate_code}/"
 
 
 class ReferralClick(models.Model):

@@ -79,19 +79,26 @@ class AffiliateDashboardView(APIView):
         # Get real commission data
         from apps.commissions.models import Commission
         
+        # Get real commission data
+        from apps.commissions.models import Commission
+        
         commission_summary = Commission.get_affiliate_summary(affiliate.id)
-        pending_commission = commission_summary.get('pending_balance', 0)
-        available_commission = commission_summary.get('available_balance', 0)
-        total_commission = commission_summary.get('total_earned', 0)
-        total_paid = commission_summary.get('total_paid', 0)
+        pending_commission = commission_summary.get('pending', 0)
+        available_commission = commission_summary.get('available', 0)
+        total_commission = commission_summary.get('total', 0)
+        total_paid = commission_summary.get('paid', 0)
+        
+        # Count Leads (Referred Users)
+        total_leads = affiliate.referred_users.count()
         
         # Recent data with select_related for performance
         recent_clicks = affiliate.clicks.select_related('affiliate').order_by('-created_at')[:5]
         recent_referrals = affiliate.referrals.select_related('order', 'order__product').order_by('-created_at')[:5]
         
         data = {
-            'total_clicks': total_clicks,
-            'total_referrals': total_referrals,
+            'total_clicks': affiliate.clicks.count(),
+            'total_leads': total_leads,
+            'total_referrals': affiliate.referrals.count(),
             'pending_commission': float(pending_commission),
             'available_commission': float(available_commission),
             'total_commission': float(total_commission),
@@ -135,7 +142,7 @@ class ReferralLinkRedirectView(APIView):
             affiliate = Affiliate.objects.get(affiliate_code=code, status='approved')
         except Affiliate.DoesNotExist:
             # Redirect to homepage if invalid code
-            return redirect(getattr(settings, 'FRONTEND_URL', 'http://localhost:5173'))
+            return redirect(self._get_frontend_url(request))
         
         # Record click
         ReferralClick.objects.create(
@@ -146,8 +153,8 @@ class ReferralLinkRedirectView(APIView):
             landing_page=request.GET.get('page', ''),
         )
         
-        # Redirect to frontend with referral code in URL parameter
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+        # Get frontend URL and add referral code
+        frontend_url = self._get_frontend_url(request)
         target_page = request.GET.get('page', '')
         
         if target_page:
@@ -156,6 +163,28 @@ class ReferralLinkRedirectView(APIView):
             redirect_url = f"{frontend_url}?ref={code}"
         
         return redirect(redirect_url)
+    
+    def _get_frontend_url(self, request):
+        """
+        Get the appropriate frontend URL based on environment and request.
+        In development, use the same host as the request but with frontend port.
+        In production, use the configured FRONTEND_URL.
+        """
+        from django.conf import settings
+        
+        if settings.DEBUG:
+            # Development: Build URL from request host
+            host = request.get_host().split(':')[0]  # Remove port if present
+            
+            # Handle different localhost variations
+            if host in ['127.0.0.1', 'localhost']:
+                return 'http://localhost:3030'
+            else:
+                # For other development hosts, use port 3030
+                return f"http://{host}:3030"
+        else:
+            # Production: Use configured FRONTEND_URL
+            return getattr(settings, 'FRONTEND_URL', 'https://qutab.co.id')
     
     def _get_client_ip(self, request):
         x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -213,57 +242,41 @@ class AffiliateStatisticsView(APIView):
         })
 
 
-class AffiliateVerifyView(APIView):
+# NOTE: Email verification (AffiliateVerifyView) has been removed.
+# Affiliate approval is now handled via Admin Dashboard at:
+# POST /api/core/admin/affiliates/{id}/approve/
+# POST /api/core/admin/affiliates/{id}/reject/
+
+
+class TrackClickAPIView(APIView):
     """
-    Handle admin verification via email link (Signed URL).
-    GET /api/affiliate/verify/<action>/<int:pk>/<str:token>/
+    API Valid for Frontend to report a click: POST /api/affiliate/track/
     """
     permission_classes = [AllowAny]
     
-    def get(self, request, action, pk, token):
-        signer = Signer()
+    def post(self, request):
+        code = request.data.get('code')
+        if not code:
+            return Response({'error': 'Code required'}, status=400)
+            
         try:
-            # Verify signature: "approve:123"
-            original = signer.unsign(token)
-            signed_action, signed_pk = original.split(':')
+            affiliate = Affiliate.objects.get(affiliate_code=code, status='approved')
+        except Affiliate.DoesNotExist:
+            return Response({'error': 'Invalid code'}, status=404)
             
-            if signed_action != action or str(signed_pk) != str(pk):
-                raise BadSignature()
-                
-        except BadSignature:
-            return HttpResponse("Invalid or expired link.", status=400)
+        # Record click
+        ReferralClick.objects.create(
+            affiliate=affiliate,
+            ip_address=self._get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+            referer_url=request.META.get('HTTP_REFERER', '')[:500],
+            landing_page=request.data.get('page', '/'),
+        )
         
-        affiliate = get_object_or_404(Affiliate, pk=pk)
-        
-        if affiliate.status == 'approved' and action == 'approve':
-            return HttpResponse(f"Affiliate {affiliate.user.email} is already approved.")
-            
-        from apps.core.services.email import EmailService
-        
-        if action == 'approve':
-            affiliate.status = 'approved'
-            affiliate.approved_at = timezone.now()
-            affiliate.save()
-            
-            # Send notification
-            EmailService.send_affiliate_approved(affiliate.user, affiliate)
-            
-            return HttpResponse(f"""
-                <h1 style='color:green'>Success</h1>
-                <p>Affiliate <b>{affiliate.user.email}</b> has been APPROVED.</p>
-                <p>Start promoting!</p>
-            """)
-            
-        elif action == 'reject':
-            affiliate.status = 'rejected'
-            affiliate.save()
-            
-            # Send notification
-            EmailService.send_affiliate_rejected(affiliate.user)
-            
-            return HttpResponse(f"""
-                <h1 style='color:red'>Rejected</h1>
-                <p>Affiliate <b>{affiliate.user.email}</b> has been REJECTED.</p>
-            """)
-        
-        return HttpResponse("Invalid action.", status=400)
+        return Response({'success': True})
+
+    def _get_client_ip(self, request):
+        x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded:
+            return x_forwarded.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR')

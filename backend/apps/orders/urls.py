@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     OrderListView, OrderDetailView, CreateOrderView, OrderTrackingView,
-    WishlistListView, WishlistAddView, WishlistRemoveView, MockCheckoutView
+    WishlistListView, WishlistAddView, WishlistRemoveView, MockCheckoutView,
+    BulkMockDataView
 )
 
 urlpatterns = [
@@ -18,4 +19,5 @@ urlpatterns = [
     
     # Mock / Testing
     path('mock-checkout/', MockCheckoutView.as_view(), name='mock-checkout'),
+    path('generate-mock-data/', BulkMockDataView.as_view(), name='generate-mock-data'),
 ]

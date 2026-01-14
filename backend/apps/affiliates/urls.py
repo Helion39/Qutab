@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     AffiliateProfileView, AffiliateStatusView, AffiliateDashboardView,
     AffiliateReferralsView, ReferralLinkRedirectView, AffiliateStatisticsView,
-    AffiliateVerifyView
+    TrackClickAPIView
 )
 
 urlpatterns = [
@@ -11,7 +11,8 @@ urlpatterns = [
     path('dashboard/', AffiliateDashboardView.as_view(), name='affiliate-dashboard'),
     path('referrals/', AffiliateReferralsView.as_view(), name='affiliate-referrals'),
     path('statistics/', AffiliateStatisticsView.as_view(), name='affiliate-statistics'),
-    path('verify/<str:action>/<int:pk>/<str:token>/', AffiliateVerifyView.as_view(), name='affiliate-verify'),
+    path('track/', TrackClickAPIView.as_view(), name='affiliate-track-click'),
+    # Email verification route removed - now using Admin Dashboard for approval
 ]
 
 # This should be added to main urls.py at root level for /r/{code}/

@@ -54,11 +54,15 @@ class ReferralSerializer(serializers.ModelSerializer):
     order_amount = serializers.DecimalField(source='order.final_amount', max_digits=12, decimal_places=0, read_only=True)
     order_status = serializers.CharField(source='order.get_status_display', read_only=True)
     
+    product_name = serializers.CharField(source='order.product.name', read_only=True)
+    commission_amount = serializers.DecimalField(source='commission.amount', max_digits=12, decimal_places=0, read_only=True, allow_null=True)
+
     class Meta:
         model = Referral
         fields = [
-            'id', 'order_number', 'order_amount', 'order_status',
+            'id', 'order_number', 'product_name', 'order_amount', 'order_status',
             'customer_name_masked', 'customer_email_masked',
+            'commission_amount',
             'status', 'created_at'
         ]
 
@@ -67,6 +71,7 @@ class AffiliateDashboardSerializer(serializers.Serializer):
     """Serializer for affiliate dashboard summary."""
     
     total_clicks = serializers.IntegerField()
+    total_leads = serializers.IntegerField()
     total_referrals = serializers.IntegerField()
     pending_commission = serializers.DecimalField(max_digits=12, decimal_places=0)
     available_commission = serializers.DecimalField(max_digits=12, decimal_places=0)

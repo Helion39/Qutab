@@ -10,8 +10,8 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'role', 'is_verified', 'created_at']
-        read_only_fields = ['id', 'email', 'role', 'is_verified', 'created_at']
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'role', 'is_verified', 'created_at', 'is_superuser', 'is_staff']
+        read_only_fields = ['id', 'email', 'role', 'is_verified', 'created_at', 'is_superuser', 'is_staff']
 
 
 class CustomerRegisterSerializer(serializers.ModelSerializer):
@@ -19,10 +19,11 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
     
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirm = serializers.CharField(write_only=True)
+    referral_code = serializers.CharField(write_only=True, required=False, allow_blank=True)
     
     class Meta:
         model = User
-        fields = ['email', 'password', 'password_confirm', 'first_name', 'last_name', 'phone']
+        fields = ['email', 'password', 'password_confirm', 'first_name', 'last_name', 'phone', 'referral_code']
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -31,6 +32,8 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop('password_confirm')
+        referral_code = validated_data.pop('referral_code', None)
+        
         user = User.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
@@ -39,6 +42,17 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
             phone=validated_data.get('phone', ''),
             role='customer'
         )
+        
+        # Link referral if code exists
+        if referral_code:
+            try:
+                from apps.affiliates.models import Affiliate
+                affiliate = Affiliate.objects.get(affiliate_code=referral_code, status='approved')
+                user.referred_by = affiliate
+                user.save(update_fields=['referred_by'])
+            except Affiliate.DoesNotExist:
+                pass # Ignore invalid codes
+                
         return user
 
 
@@ -53,13 +67,15 @@ class AffiliateRegisterSerializer(serializers.ModelSerializer):
     tiktok = serializers.CharField(required=False, allow_blank=True)
     primary_platform = serializers.CharField(required=True)
     reason = serializers.CharField(required=True)
+    is_google_user = serializers.BooleanField(required=False, write_only=True)
     
     class Meta:
         model = User
         fields = [
             'email', 'password', 'password_confirm', 
             'first_name', 'last_name', 'whatsapp', 'city',
-            'instagram', 'tiktok', 'primary_platform', 'reason'
+            'instagram', 'tiktok', 'primary_platform', 'reason',
+            'is_google_user'
         ]
     
     def validate(self, attrs):
@@ -80,6 +96,7 @@ class AffiliateRegisterSerializer(serializers.ModelSerializer):
             'reason': validated_data.pop('reason'),
         }
         validated_data.pop('password_confirm')
+        is_google_user = validated_data.pop('is_google_user', False)
         
         # Create user with affiliate role
         user = User.objects.create_user(
@@ -88,7 +105,8 @@ class AffiliateRegisterSerializer(serializers.ModelSerializer):
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             phone=affiliate_data['whatsapp'],  # Use whatsapp as phone
-            role='affiliate'
+            role='affiliate',
+            is_verified=is_google_user  # Auto-verify if Google user
         )
         
         # Create Affiliate record

@@ -124,6 +124,78 @@ class LoginView(APIView):
         })
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class GoogleLoginView(APIView):
+    """Login using Google OAuth access token."""
+    
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        access_token = request.data.get('access_token')
+        
+        if not access_token:
+            return Response(
+                {'error': 'Access token is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Verify token with Google
+        import requests
+        try:
+            google_response = requests.get(
+                'https://www.googleapis.com/oauth2/v3/userinfo',
+                headers={'Authorization': f'Bearer {access_token}'}
+            )
+            
+            if google_response.status_code != 200:
+                return Response(
+                    {'error': 'Invalid Google token.'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+                
+            user_info = google_response.json()
+            email = user_info.get('email')
+            
+            if not email:
+                return Response(
+                    {'error': 'Google account email not found.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            # Find user
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response(
+                    {'error': 'User not found. Please register first.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+                
+            if not user.is_active:
+                return Response(
+                    {'error': 'Account is deactivated.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+                
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'message': 'Login successful',
+                'user': UserSerializer(user).data,
+                'tokens': {
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh),
+                }
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Google login failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 class LogoutView(APIView):
     """Logout by blacklisting the refresh token."""
     

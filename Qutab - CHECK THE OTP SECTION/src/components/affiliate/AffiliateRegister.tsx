@@ -129,9 +129,17 @@ export default function AffiliateRegister() {
       // Here you would normally send the data to your backend
       console.log('Form submitted:', formData);
       
-      // Navigate to pending verification page
-      navigate('/affiliate/pending');
+      // Navigate to OTP verification page
+      navigate('/affiliate/otp');
     }
+  };
+
+  const handleGoogleAuth = () => {
+    // Here you would normally integrate with Google OAuth
+    console.log('Google authentication triggered');
+    alert('Google authentication will be integrated here');
+    // After Google auth success, navigate to pending or complete the registration
+    // navigate('/affiliate/pending');
   };
 
   return (
@@ -165,6 +173,30 @@ export default function AffiliateRegister() {
 
         {/* Form Card */}
         <div className="bg-white border-4 border-black p-6 md:p-10">
+          {/* Google Auth Button */}
+          <div className="mb-8">
+            <button
+              type="button"
+              onClick={handleGoogleAuth}
+              className="w-full h-14 bg-white text-black font-black uppercase tracking-wider text-lg border-4 border-black shadow-[8px_8px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_#000000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-3"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.8055 10.2292C19.8055 9.55135 19.7508 8.86865 19.6359 8.19843H10.2V12.0492H15.6014C15.3773 13.2911 14.6571 14.3898 13.6025 15.0878V17.5866H16.825C18.7177 15.8449 19.8055 13.2728 19.8055 10.2292Z" fill="#4285F4"/>
+                <path d="M10.2001 20.0006C12.9515 20.0006 15.2693 19.1151 16.8252 17.5865L13.6027 15.0877C12.7062 15.6979 11.5493 16.0433 10.2001 16.0433C7.54275 16.0433 5.28174 14.2834 4.47668 11.9169H1.15234V14.4927C2.73289 17.6349 6.31926 20.0006 10.2001 20.0006Z" fill="#34A853"/>
+                <path d="M4.47656 11.917C4.05516 10.6751 4.05516 9.32629 4.47656 8.08435V5.50854H1.15222C-0.384074 8.57022 -0.384074 12.4312 1.15222 15.4929L4.47656 11.917Z" fill="#FBBC04"/>
+                <path d="M10.2001 3.95738C11.6217 3.93555 13.0004 4.47247 14.0359 5.45781L16.8907 2.60298C15.1814 0.990477 12.9288 0.0954484 10.2001 0.11728C6.31926 0.11728 2.73289 2.48296 1.15234 5.50845L4.47668 8.08426C5.28174 5.71777 7.54275 3.95738 10.2001 3.95738Z" fill="#EA4335"/>
+              </svg>
+              Daftar dengan Google
+            </button>
+            
+            {/* OR Divider */}
+            <div className="flex items-center gap-4 my-8">
+              <div className="flex-1 h-1 bg-black"></div>
+              <span className="font-black text-lg uppercase px-2">Atau</span>
+              <div className="flex-1 h-1 bg-black"></div>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Section 01: Personal Info */}
             <div>

@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from .otp_models import EmailOTP
+from .email_templates import get_otp_email_html
 from apps.affiliates.models import Affiliate
 
 User = get_user_model()
@@ -46,7 +47,7 @@ class SendOTPView(APIView):
         # Send email
         try:
             subject = 'Kode Verifikasi Qutab - Pendaftaran Affiliator'
-            message = f"""
+            text_message = f"""
 Halo!
 
 Terima kasih telah mendaftar sebagai affiliator Qutab.
@@ -63,12 +64,15 @@ Salam,
 Tim Qutab
             """
             
+            html_message = get_otp_email_html(otp.otp_code)
+            
             send_mail(
                 subject,
-                message,
+                text_message,
                 settings.DEFAULT_FROM_EMAIL,
                 [email],
                 fail_silently=False,
+                html_message=html_message
             )
             
             return Response({
@@ -198,12 +202,22 @@ class ResendOTPView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Find existing OTP to get registration data
+        # Find existing OTP to get registration data and check cooldown
         try:
             old_otp = EmailOTP.objects.filter(
                 email=email,
                 is_verified=False
             ).latest('created_at')
+            
+            # Check if last OTP was sent less than 60 seconds ago
+            from django.utils import timezone
+            from datetime import timedelta
+            if timezone.now() < old_otp.created_at + timedelta(seconds=60):
+                return Response(
+                    {'error': 'Mohon tunggu 60 detik sebelum mengirim ulang kode.'},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS
+                )
+                
             registration_data = old_otp.registration_data
         except EmailOTP.DoesNotExist:
             registration_data = None
@@ -214,7 +228,7 @@ class ResendOTPView(APIView):
         # Send email (same as SendOTPView)
         try:
             subject = 'Kode Verifikasi Baru - Qutab'
-            message = f"""
+            text_message = f"""
 Halo!
 
 Berikut adalah kode verifikasi baru Anda:
@@ -227,12 +241,15 @@ Salam,
 Tim Qutab
             """
             
+            html_message = get_otp_email_html(otp.otp_code)
+            
             send_mail(
                 subject,
-                message,
+                text_message,
                 settings.DEFAULT_FROM_EMAIL,
                 [email],
                 fail_silently=False,
+                html_message=html_message
             )
         except Exception as e:
             print(f"Email send failed: {e}")

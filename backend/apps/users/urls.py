@@ -5,18 +5,21 @@ from .views import (
     CustomerRegisterView,
     AffiliateRegisterView,
     LoginView,
+    GoogleLoginView,
     LogoutView,
     ProfileView,
     ChangePasswordView,
     AffiliateStatusView,
     MockCleanupView,
 )
+from .otp_models import EmailOTP
 from .otp_views import SendOTPView, VerifyOTPView, ResendOTPView
 
 urlpatterns = [
     # Customer Auth
     path('auth/register/', CustomerRegisterView.as_view(), name='customer-register'),
     path('auth/login/', LoginView.as_view(), name='login'),
+    path('auth/google-login/', GoogleLoginView.as_view(), name='google-login'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     

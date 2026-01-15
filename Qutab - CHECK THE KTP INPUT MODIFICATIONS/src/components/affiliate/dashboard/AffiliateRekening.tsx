@@ -123,22 +123,55 @@ export default function AffiliateRekening() {
             </label>
             
             {ktpPreview ? (
-              <div className="relative">
-                <img 
-                  src={ktpPreview} 
-                  alt="KTP Preview" 
-                  className="w-full max-w-md h-48 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-700"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setKtpFile(null);
-                    setKtpPreview('');
-                  }}
-                  className="absolute top-2 right-2 size-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
-                >
-                  <MaterialIcon icon="close" className="text-[18px]" />
-                </button>
+              <div className="space-y-4">
+                {/* Image Preview */}
+                <div className="relative">
+                  <img 
+                    src={ktpPreview} 
+                    alt="KTP Preview" 
+                    className="w-full h-80 object-contain rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#2d1b24]"
+                  />
+                </div>
+                
+                {/* Confirmation Text */}
+                <div className="bg-gray-200 dark:bg-[#3d2531] border-2 border-gray-300 dark:border-gray-700 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <MaterialIcon icon="help" className="text-gray-500 dark:text-gray-400 text-2xl mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-[#4a2c3a] dark:text-white mb-1">
+                        Apakah ini KTP anda?
+                      </p>
+                      <p className="text-xs text-[#7d5a6a] dark:text-gray-400">
+                        Pastikan foto KTP jelas, tidak buram, dan semua informasi terbaca dengan baik
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <label className="flex-1 px-4 py-2.5 bg-white dark:bg-[#2d1b24] border-2 border-gray-300 dark:border-gray-700 hover:border-[#bdbef5] text-[#4a2c3a] dark:text-white rounded-lg font-semibold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2">
+                    <MaterialIcon icon="sync" className="text-[18px]" />
+                    Ganti
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleKtpUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setKtpFile(null);
+                      setKtpPreview('');
+                    }}
+                    className="flex-1 px-4 py-2.5 bg-white dark:bg-[#2d1b24] border-2 border-red-300 dark:border-red-900 hover:border-red-500 text-red-600 dark:text-red-400 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MaterialIcon icon="delete" className="text-[18px]" />
+                    Hapus
+                  </button>
+                </div>
               </div>
             ) : (
               <label className="block border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center hover:border-[#bdbef5] transition-colors cursor-pointer">
@@ -159,9 +192,11 @@ export default function AffiliateRekening() {
               </label>
             )}
             
-            <p className="text-xs text-[#7d5a6a] dark:text-gray-400 mt-2">
-              Pastikan foto KTP jelas dan terbaca untuk mempercepat verifikasi
-            </p>
+            {!ktpPreview && (
+              <p className="text-xs text-[#7d5a6a] dark:text-gray-400 mt-2">
+                Pastikan foto KTP jelas dan terbaca untuk mempercepat verifikasi
+              </p>
+            )}
           </div>
 
           {/* Consent Checkbox */}

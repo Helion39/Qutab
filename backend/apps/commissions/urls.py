@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     CommissionListView, CommissionSummaryView,
     BankAccountListView, BankAccountDetailView,
-    PayoutListView, PayoutRequestView
+    PayoutListView, PayoutRequestView,
+    AdminBankAccountListView, AdminVerifyBankAccountView, AdminRejectBankAccountView, AdminDeleteBankAccountView
 )
 
 urlpatterns = [
@@ -17,4 +18,10 @@ urlpatterns = [
     # Payouts
     path('payouts/', PayoutListView.as_view(), name='payout-list'),
     path('payouts/request/', PayoutRequestView.as_view(), name='payout-request'),
+    
+    # --- Admin Routes ---
+    path('admin/bank-accounts/', AdminBankAccountListView.as_view(), name='admin-bank-account-list'),
+    path('admin/bank-accounts/<int:pk>/verify/', AdminVerifyBankAccountView.as_view(), name='admin-bank-account-verify'),
+    path('admin/bank-accounts/<int:pk>/reject/', AdminRejectBankAccountView.as_view(), name='admin-bank-account-reject'),
+    path('admin/bank-accounts/<int:pk>/delete/', AdminDeleteBankAccountView.as_view(), name='admin-bank-account-delete'),
 ]

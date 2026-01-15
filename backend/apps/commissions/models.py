@@ -140,6 +140,7 @@ class BankAccount(models.Model):
     # KTP verification
     ktp_image = models.ImageField(upload_to='ktp/', blank=True)
     verification_status = models.CharField(max_length=20, choices=VERIFICATION_STATUS_CHOICES, default='pending')
+    rejection_reason = models.CharField(max_length=255, blank=True)
     
     is_primary = models.BooleanField(default=False)
     

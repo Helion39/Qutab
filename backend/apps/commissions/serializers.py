@@ -36,9 +36,9 @@ class BankAccountSerializer(serializers.ModelSerializer):
         model = BankAccount
         fields = [
             'id', 'bank_name', 'account_number', 'account_number_masked',
-            'account_holder', 'verification_status', 'is_primary', 'created_at'
+            'account_holder', 'ktp_image', 'verification_status', 'rejection_reason', 'is_primary', 'created_at'
         ]
-        read_only_fields = ['verification_status', 'created_at']
+        read_only_fields = ['verification_status', 'rejection_reason', 'created_at']
     
     def get_account_number_masked(self, obj):
         """Mask account number for display."""
@@ -54,6 +54,27 @@ class BankAccountCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = BankAccount
         fields = ['bank_name', 'account_number', 'account_holder', 'ktp_image', 'is_primary']
+
+
+class AdminBankAccountSerializer(serializers.ModelSerializer):
+    """Serializer for admin bank account verification list."""
+    
+    affiliate_id = serializers.IntegerField(source='affiliate.id', read_only=True)
+    affiliate_name = serializers.SerializerMethodField()
+    affiliate_email = serializers.EmailField(source='affiliate.user.email', read_only=True)
+    affiliate_phone = serializers.CharField(source='affiliate.whatsapp', read_only=True)
+    
+    class Meta:
+        model = BankAccount
+        fields = [
+            'id', 'affiliate_id', 'affiliate_name', 'affiliate_email', 'affiliate_phone',
+            'bank_name', 'account_number', 'account_holder',
+            'ktp_image', 'verification_status', 'rejection_reason', 'created_at', 'verified_at'
+        ]
+    
+    def get_affiliate_name(self, obj):
+        user = obj.affiliate.user
+        return f"{user.first_name} {user.last_name}".strip() or user.email
 
 
 class PayoutSerializer(serializers.ModelSerializer):

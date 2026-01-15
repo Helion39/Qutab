@@ -5,6 +5,7 @@ import LoginPage from './components/LoginPage';
 import Dashboard from './components/Dashboard';
 import AffiliateRegister from './components/affiliate/AffiliateRegister';
 import AffiliateOTP from './components/affiliate/AffiliateOTP';
+import AffiliatePending from './components/affiliate/AffiliatePending';
 import AffiliateLogin from './components/affiliate/AffiliateLogin';
 import AffiliateDashboard from './components/affiliate/AffiliateDashboard';
 import AdminLogin from './components/admin/AdminLogin';
@@ -31,6 +32,7 @@ function App() {
         />
         <Route path="/affiliate/register" element={<AffiliateRegister />} />
         <Route path="/affiliate/otp" element={<AffiliateOTP />} />
+        <Route path="/affiliate/pending" element={<AffiliatePending setIsAffiliateLoggedIn={setIsAffiliateLoggedIn} />} />
         <Route path="/affiliate/login" element={<AffiliateLogin setIsAffiliateLoggedIn={setIsAffiliateLoggedIn} />} />
         <Route 
           path="/affiliate/dashboard/*" 

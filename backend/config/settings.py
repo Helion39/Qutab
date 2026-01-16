@@ -28,7 +28,8 @@ if XENDIT_API_KEY:
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# Defaults to False for safety - explicitly set DEBUG=True in .env for development
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'localhost', 
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'axes',  # Brute-force protection
     
     # Local apps
     'apps.core',
@@ -76,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',  # Brute-force protection - must be last
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -155,6 +158,29 @@ SIMPLE_JWT = {
 }
 
 
+# Authentication Backends (required for django-axes)
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',  # Rate limiting
+    'django.contrib.auth.backends.ModelBackend',  # Default
+]
+
+
+# =============================================================================
+# DJANGO-AXES (Brute-Force Protection)
+# Based on NIST 800-63B guidelines for e-commerce
+# =============================================================================
+AXES_FAILURE_LIMIT = 10  # NIST recommends ≥10 for e-commerce (prevents DoS lockout attacks)
+AXES_COOLOFF_TIME = 0.5  # Lock for 30 minutes (0.5 hours)
+AXES_LOCKOUT_CALLABLE = None  # Use default lockout response
+AXES_RESET_ON_SUCCESS = True  # Reset counter on successful login
+AXES_ONLY_USER_FAILURES = False  # Track IP + username combination
+AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True  # Lock specific IP + user combo
+
+# What counts as a login attempt (for API/DRF)
+AXES_USERNAME_FORM_FIELD = 'email'  # Our login uses email field
+AXES_SENSITIVE_PARAMETERS = ['password', 'new_password', 'old_password']
+
+
 # CORS Configuration - Allow frontend during development and production
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
@@ -231,12 +257,34 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.hostinger.com'
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'admin@qurbantanpabatas.id'
-EMAIL_HOST_PASSWORD = 'Qurb@nT4np4B@t4s!' # Provided by user
-DEFAULT_FROM_EMAIL = 'Qutab Notification <admin@qurbantanpabatas.id>'
-ADMIN_EMAIL = 'admin@qurbantanpabatas.id'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'admin@qurbantanpabatas.id')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')  # Set in .env file!
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Qutab Notification <admin@qurbantanpabatas.id>')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@qurbantanpabatas.id')
 
 
 # For dev/testing (Console):
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+
+# =============================================================================
+# PRODUCTION SECURITY SETTINGS (Auto-enabled when DEBUG=False)
+# =============================================================================
+if not DEBUG:
+    # HTTPS/SSL
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # Cookies
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    
+    # Headers
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

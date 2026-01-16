@@ -190,8 +190,10 @@ class GoogleLoginView(APIView):
             })
             
         except Exception as e:
+            # Log the actual error for debugging, but don't expose to user
+            print(f"Google login error: {e}")
             return Response(
-                {'error': f'Google login failed: {str(e)}'},
+                {'error': 'Login dengan Google gagal. Silakan coba lagi.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -282,7 +284,8 @@ class MockCleanupView(APIView):
 
     def post(self, request):
         if not getattr(settings, 'DEBUG', False):
-             return Response({'error': 'Not allowed in production'}, status=status.HTTP_403_FORBIDDEN)
+            # In production, pretend this endpoint doesn't exist
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
         
         # Lazy imports to avoid circular deps if any
         from apps.orders.models import Order
@@ -295,3 +298,119 @@ class MockCleanupView(APIView):
         deleted_count, _ = User.objects.filter(is_staff=False, is_superuser=False).delete()
         
         return Response({'message': f'Cleanup successful! Deleted {deleted_count} test users.'})
+
+
+# --- Admin User Management Views ---
+
+from rest_framework.permissions import IsAdminUser
+from .serializers import AdminUserSerializer
+from django.contrib.auth.hashers import make_password
+import secrets
+import string
+
+
+class AdminUserListView(generics.ListAPIView):
+    """Admin: List all users with optional role filtering."""
+    
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminUserSerializer
+    
+    def get_queryset(self):
+        queryset = User.objects.all().order_by('-created_at')
+        
+        # Filter by role
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role)
+            
+        # Search by email or name
+        search = self.request.query_params.get('search')
+        if search:
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(email__icontains=search) |
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search)
+            )
+            
+        # Exclude staff/superusers from normal admin view
+        exclude_staff = self.request.query_params.get('exclude_staff', 'true')
+        if exclude_staff.lower() == 'true':
+            queryset = queryset.filter(is_staff=False, is_superuser=False)
+            
+        return queryset
+
+
+class AdminUserDetailView(generics.RetrieveAPIView):
+    """Admin: Get detailed user info."""
+    
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminUserSerializer
+    queryset = User.objects.all()
+    lookup_field = 'id'
+
+
+class AdminUserSuspendView(APIView):
+    """Admin: Suspend/deactivate a user account."""
+    
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        if user.is_superuser or user.is_staff:
+            return Response({'error': 'Cannot suspend admin users'}, status=status.HTTP_403_FORBIDDEN)
+            
+        user.is_active = False
+        user.save(update_fields=['is_active'])
+        
+        return Response({'message': f'User {user.email} has been suspended.'})
+
+
+class AdminUserActivateView(APIView):
+    """Admin: Activate a suspended user account."""
+    
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        user.is_active = True
+        user.save(update_fields=['is_active'])
+        
+        return Response({'message': f'User {user.email} has been activated.'})
+
+
+class AdminUserResetPasswordView(APIView):
+    """Admin: Reset user password to a random temporary password."""
+    
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        if user.is_superuser:
+            return Response({'error': 'Cannot reset superuser password'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Generate random password
+        alphabet = string.ascii_letters + string.digits
+        new_password = ''.join(secrets.choice(alphabet) for _ in range(12))
+        
+        user.set_password(new_password)
+        user.save()
+        
+        # In production, you'd email this to the user instead of returning it
+        return Response({
+            'message': f'Password reset for {user.email}',
+            'temporary_password': new_password,
+            'note': 'User should change this password immediately.'
+        })

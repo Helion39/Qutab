@@ -1,13 +1,14 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from .models import Order, OrderTracking, Wishlist
 from .serializers import (
     OrderListSerializer, OrderDetailSerializer, CreateOrderSerializer,
-    WishlistSerializer, WishlistCreateSerializer
+    WishlistSerializer, WishlistCreateSerializer, AdminOrderSerializer
 )
 from apps.payments.zendit import zendit_service
 from apps.products.models import Product
@@ -237,7 +238,85 @@ class BulkMockDataView(APIView):
     def post(self, request):
         from apps.payments.mock_service import MockPaymentService
         
-        # Generate realistic scenario
         result = MockPaymentService.simulate_realistic_scenario()
         
         return Response(result)
+
+
+# --- Admin Views ---
+
+class AdminOrderListView(generics.ListAPIView):
+    """
+    Admin: List all orders with advanced filtering.
+    """
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminOrderSerializer
+    
+    def get_queryset(self):
+        queryset = Order.objects.all().order_by('-created_at')
+        
+        # Filtering (simple for now, can be expanded)
+        status_param = self.request.query_params.get('status')
+        if status_param and status_param != 'all':
+            queryset = queryset.filter(status=status_param)
+            
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(order_number__icontains=search)
+            # Add more search fields if needed (e.g. user email) via Q objects
+            
+        return queryset
+
+
+class AdminOrderDetailView(generics.RetrieveAPIView):
+    """
+    Admin: Get full details of a specific order.
+    """
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminOrderSerializer
+    queryset = Order.objects.all()
+    lookup_field = 'id'
+
+
+class AdminOrderStatusUpdateView(APIView):
+    """
+    Admin: Update order status manually.
+    Triggers side effects (e.g. commissions) if marked as paid.
+    """
+    permission_classes = [IsAdminUser]
+
+    def patch(self, request, id):
+        order = get_object_or_404(Order, id=id)
+        new_status = request.data.get('status')
+        
+        if not new_status:
+            return Response({'error': 'Status is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if new_status not in dict(Order.STATUS_CHOICES):
+            return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        previous_status = order.status
+        
+        # If Admin marks as PAID, trigger the full payment success logic
+        if new_status == 'paid' and previous_status != 'paid':
+            from apps.payments.utils import process_payment_success
+            process_payment_success(order, payment_method='manual_admin')
+            # Fetch updated order to return
+            order.refresh_from_db()
+            return Response(AdminOrderSerializer(order).data)
+            
+        # For other status changes (processing, completed, cancelled)
+        order.status = new_status
+        if new_status == 'completed':
+            order.completed_at = timezone.now()
+        
+        order.save()
+        
+        # Log the change
+        OrderTracking.objects.create(
+            order=order,
+            status=new_status,
+            message=f"Status updated to {new_status} by admin."
+        )
+        
+        return Response(AdminOrderSerializer(order).data)

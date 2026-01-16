@@ -128,66 +128,9 @@ class PaymentWebhookView(APIView):
     
     def _handle_payment_success(self, order, data):
         """Handle successful payment."""
-        if order.status in ['paid', 'processing', 'completed']:
-            logger.info(f'Order {order.order_number} already processed')
-            return
-        
-        order.status = 'paid'
-        order.paid_at = timezone.now()
-        order.payment_method = data.get('payment_method', 'zendit')
-        order.save()
-        
-        # Add tracking
-        OrderTracking.objects.create(
-            order=order,
-            status='paid',
-            message='Payment received successfully.'
-        )
-        
-        logger.info(f'Order {order.order_number} marked as paid')
-        
-        # Create commission for affiliate if referral_code exists
-        if order.referral_code:
-            try:
-                from apps.affiliates.models import Affiliate, Referral
-                from apps.commissions.models import Commission
-                
-                affiliate = Affiliate.objects.get(
-                    affiliate_code=order.referral_code,
-                    status='approved'
-                )
-                
-                # Create referral record with masked customer data
-                referral = Referral.objects.create(
-                    affiliate=affiliate,
-                    order=order,
-                    customer=order.user,
-                    customer_name_masked=Referral.mask_name(order.user.get_full_name()),
-                    customer_email_masked=Referral.mask_email(order.user.email),
-                    status='confirmed'
-                )
-                
-                # Calculate commission amount
-                commission_rate = affiliate.custom_commission_rate or order.product.commission_rate
-                commission_amount = Commission.calculate_amount(order.final_amount, commission_rate)
-                
-                # Create commission record (status=pending, will mature after 30 days)
-                Commission.objects.create(
-                    affiliate=affiliate,
-                    referral=referral,
-                    order=order,
-                    order_amount=order.final_amount,
-                    commission_rate=commission_rate,
-                    amount=commission_amount,
-                    status='pending'
-                )
-                
-                logger.info(f'Commission created for affiliate {affiliate.affiliate_code}: Rp {commission_amount:,.0f}')
-                
-            except Affiliate.DoesNotExist:
-                logger.warning(f'Invalid or inactive referral code: {order.referral_code}')
-            except Exception as e:
-                logger.error(f'Error creating commission for order {order.order_number}: {str(e)}')
+        from .utils import process_payment_success
+        payment_method = data.get('payment_method', 'zendit')
+        process_payment_success(order, payment_method)
     
     def _handle_payment_expired(self, order, data):
         """Handle expired payment."""

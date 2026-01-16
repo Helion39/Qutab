@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     OrderListView, OrderDetailView, CreateOrderView, OrderTrackingView,
     WishlistListView, WishlistAddView, WishlistRemoveView, MockCheckoutView,
-    BulkMockDataView
+    BulkMockDataView,
+    AdminOrderListView, AdminOrderDetailView, AdminOrderStatusUpdateView
 )
 
 urlpatterns = [
@@ -20,4 +21,10 @@ urlpatterns = [
     # Mock / Testing
     path('mock-checkout/', MockCheckoutView.as_view(), name='mock-checkout'),
     path('generate-mock-data/', BulkMockDataView.as_view(), name='generate-mock-data'),
+    
+    # Admin Management
+    # Endpoint: /api/orders/admin/...
+    path('admin/', AdminOrderListView.as_view(), name='admin-order-list'),
+    path('admin/<uuid:id>/', AdminOrderDetailView.as_view(), name='admin-order-detail'),
+    path('admin/<uuid:id>/status/', AdminOrderStatusUpdateView.as_view(), name='admin-order-status'),
 ]

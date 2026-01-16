@@ -11,9 +11,15 @@ from .views import (
     ChangePasswordView,
     AffiliateStatusView,
     MockCleanupView,
+    AdminUserListView,
+    AdminUserDetailView,
+    AdminUserSuspendView,
+    AdminUserActivateView,
+    AdminUserResetPasswordView,
 )
 from .otp_models import EmailOTP
 from .otp_views import SendOTPView, VerifyOTPView, ResendOTPView
+from .password_reset_views import ForgotPasswordView, ResetPasswordView
 
 urlpatterns = [
     # Customer Auth
@@ -22,6 +28,10 @@ urlpatterns = [
     path('auth/google-login/', GoogleLoginView.as_view(), name='google-login'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    
+    # Password Reset
+    path('auth/forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
+    path('auth/reset-password/', ResetPasswordView.as_view(), name='reset-password'),
     
     # Profile
     path('auth/profile/', ProfileView.as_view(), name='profile'),
@@ -39,5 +49,12 @@ urlpatterns = [
     
     # Dev Tools
     path('auth/dev/cleanup/', MockCleanupView.as_view(), name='dev-cleanup'),
+    
+    # Admin User Management
+    path('admin/users/', AdminUserListView.as_view(), name='admin-user-list'),
+    path('admin/users/<uuid:id>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
+    path('admin/users/<uuid:id>/suspend/', AdminUserSuspendView.as_view(), name='admin-user-suspend'),
+    path('admin/users/<uuid:id>/activate/', AdminUserActivateView.as_view(), name='admin-user-activate'),
+    path('admin/users/<uuid:id>/reset-password/', AdminUserResetPasswordView.as_view(), name='admin-user-reset-password'),
 ]
 

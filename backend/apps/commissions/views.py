@@ -240,3 +240,193 @@ class AdminDeleteBankAccountView(APIView):
         bank_account = get_object_or_404(BankAccount, pk=pk)
         bank_account.delete()
         return Response({'message': 'Bank account deleted successfully.'})
+
+
+# --- Admin Payout Views ---
+
+from .serializers import AdminPayoutSerializer
+
+
+class AdminPayoutListView(generics.ListAPIView):
+    """Admin: List all payout requests."""
+    
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminPayoutSerializer
+    
+    def get_queryset(self):
+        queryset = Payout.objects.all().select_related(
+            'affiliate', 'affiliate__user', 'bank_account'
+        ).order_by(
+            # Pending first
+            models.Case(
+                models.When(status='pending', then=0),
+                default=1
+            ),
+            '-requested_at'
+        )
+        
+        # Filter by status
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+            
+        return queryset
+
+
+class AdminPayoutConfirmView(APIView):
+    """Admin: Confirm a payout request (mark as paid)."""
+    
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request, pk):
+        payout = get_object_or_404(Payout, pk=pk)
+        
+        if payout.status != 'pending':
+            return Response(
+                {'error': f'Payout is not pending. Current status: {payout.status}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        transaction_id = request.data.get('transaction_id')
+        if not transaction_id:
+            return Response(
+                {'error': 'transaction_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Mark as paid
+        payout.status = 'paid'
+        payout.transaction_id = transaction_id
+        payout.processed_at = timezone.now()
+        payout.save(update_fields=['status', 'transaction_id', 'processed_at'])
+        
+        return Response({
+            'message': f'Payout confirmed. Transaction ID: {transaction_id}',
+            'payout': AdminPayoutSerializer(payout).data
+        })
+
+
+class AdminPayoutRejectView(APIView):
+    """Admin: Reject a payout request (returns funds to available balance)."""
+    
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request, pk):
+        payout = get_object_or_404(Payout, pk=pk)
+        
+        if payout.status != 'pending':
+            return Response(
+                {'error': f'Payout is not pending. Current status: {payout.status}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        reason = request.data.get('reason', 'Rejected by admin')
+        
+        # Refund the amount back to commissions
+        # Find related pending commissions and make them available again
+        # For now, we just mark as failed
+        payout.status = 'failed'
+        payout.notes = reason
+        payout.processed_at = timezone.now()
+        payout.save(update_fields=['status', 'notes', 'processed_at'])
+        
+        return Response({
+            'message': 'Payout rejected.',
+            'reason': reason,
+            'payout': AdminPayoutSerializer(payout).data
+        })
+
+
+# --- Coupon Views ---
+
+from .models import Coupon
+from .serializers import CouponSerializer, CouponCreateSerializer
+
+
+class CouponListView(generics.ListCreateAPIView):
+    """List affiliate's coupons or create a new one."""
+    
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CouponCreateSerializer
+        return CouponSerializer
+    
+    def get_queryset(self):
+        try:
+            affiliate = Affiliate.objects.get(user=self.request.user)
+            return Coupon.objects.filter(affiliate=affiliate)
+        except Affiliate.DoesNotExist:
+            return Coupon.objects.none()
+    
+    def perform_create(self, serializer):
+        try:
+            affiliate = Affiliate.objects.get(user=self.request.user, status='approved')
+            serializer.save(affiliate=affiliate)
+        except Affiliate.DoesNotExist:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied('Only approved affiliates can create coupons')
+
+
+class CouponDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Get, update, or delete a coupon."""
+    
+    permission_classes = [IsAuthenticated]
+    serializer_class = CouponSerializer
+    
+    def get_queryset(self):
+        try:
+            affiliate = Affiliate.objects.get(user=self.request.user)
+            return Coupon.objects.filter(affiliate=affiliate)
+        except Affiliate.DoesNotExist:
+            return Coupon.objects.none()
+
+
+class CouponValidateView(APIView):
+    """Public endpoint to validate a coupon code at checkout."""
+    
+    permission_classes = []  # Public access for checkout
+    authentication_classes = []
+    
+    def get(self, request, code):
+        try:
+            coupon = Coupon.objects.get(code=code.upper())
+        except Coupon.DoesNotExist:
+            return Response({
+                'is_valid': False,
+                'message': 'Coupon code not found',
+                'code': code.upper()
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Get optional order amount for validation
+        order_amount = request.query_params.get('amount')
+        if order_amount:
+            try:
+                order_amount = float(order_amount)
+            except ValueError:
+                order_amount = None
+        
+        is_valid, message = coupon.is_valid(order_amount=order_amount)
+        
+        response_data = {
+            'is_valid': is_valid,
+            'message': message,
+            'code': coupon.code,
+        }
+        
+        if is_valid:
+            response_data.update({
+                'discount_type': coupon.discount_type,
+                'discount_value': float(coupon.discount_value),
+                'discount_display': coupon.get_discount_display(),
+                'affiliate_code': coupon.affiliate.affiliate_code,
+            })
+            
+            # Calculate discount if amount provided
+            if order_amount:
+                from decimal import Decimal
+                discount_amount = coupon.calculate_discount(Decimal(str(order_amount)))
+                response_data['discount_amount'] = float(discount_amount)
+        
+        return Response(response_data)

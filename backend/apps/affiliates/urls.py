@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     AffiliateProfileView, AffiliateStatusView, AffiliateDashboardView,
     AffiliateReferralsView, ReferralLinkRedirectView, AffiliateStatisticsView,
-    TrackClickAPIView
+    TrackClickAPIView,
+    AdminReferralListView, AdminReferralStatusUpdateView, AdminReferralReassignView
 )
 
 urlpatterns = [
@@ -12,7 +13,11 @@ urlpatterns = [
     path('referrals/', AffiliateReferralsView.as_view(), name='affiliate-referrals'),
     path('statistics/', AffiliateStatisticsView.as_view(), name='affiliate-statistics'),
     path('track/', TrackClickAPIView.as_view(), name='affiliate-track-click'),
-    # Email verification route removed - now using Admin Dashboard for approval
+    
+    # Admin Referral Management
+    path('admin/referrals/', AdminReferralListView.as_view(), name='admin-referral-list'),
+    path('admin/referrals/<int:pk>/status/', AdminReferralStatusUpdateView.as_view(), name='admin-referral-status'),
+    path('admin/referrals/<int:pk>/reassign/', AdminReferralReassignView.as_view(), name='admin-referral-reassign'),
 ]
 
 # This should be added to main urls.py at root level for /r/{code}/

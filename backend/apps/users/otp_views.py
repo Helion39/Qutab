@@ -180,8 +180,10 @@ class VerifyOTPView(APIView):
             })
             
         except Exception as e:
+            # Log the actual error for debugging
+            print(f"Account creation error: {e}")
             return Response(
-                {'error': f'Gagal membuat akun: {str(e)}'},
+                {'error': 'Gagal membuat akun. Silakan coba lagi atau hubungi support.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

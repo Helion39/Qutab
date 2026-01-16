@@ -280,3 +280,87 @@ class TrackClickAPIView(APIView):
         if x_forwarded:
             return x_forwarded.split(',')[0].strip()
         return request.META.get('REMOTE_ADDR')
+
+
+# --- Admin Referral Views ---
+
+from rest_framework.permissions import IsAdminUser
+from .serializers import AdminReferralSerializer
+
+
+class AdminReferralListView(generics.ListAPIView):
+    """Admin: List all referrals with filtering."""
+    
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminReferralSerializer
+    
+    def get_queryset(self):
+        queryset = Referral.objects.all().select_related(
+            'affiliate', 'affiliate__user', 'order', 'order__product', 'customer'
+        ).order_by('-created_at')
+        
+        # Filter by status
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+            
+        # Filter by affiliate
+        affiliate_id = self.request.query_params.get('affiliate_id')
+        if affiliate_id:
+            queryset = queryset.filter(affiliate_id=affiliate_id)
+            
+        return queryset
+
+
+class AdminReferralStatusUpdateView(APIView):
+    """Admin: Update referral status."""
+    
+    permission_classes = [IsAdminUser]
+    
+    def patch(self, request, pk):
+        referral = get_object_or_404(Referral, pk=pk)
+        new_status = request.data.get('status')
+        
+        if not new_status:
+            return Response({'error': 'Status is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        valid_statuses = ['confirmed', 'pending', 'cancelled']
+        if new_status not in valid_statuses:
+            return Response({'error': f'Invalid status. Must be one of: {valid_statuses}'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        referral.status = new_status
+        referral.save(update_fields=['status'])
+        
+        return Response(AdminReferralSerializer(referral).data)
+
+
+class AdminReferralReassignView(APIView):
+    """Admin: Reassign referral to a different affiliate."""
+    
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request, pk):
+        referral = get_object_or_404(Referral, pk=pk)
+        new_affiliate_id = request.data.get('affiliate_id')
+        
+        if not new_affiliate_id:
+            return Response({'error': 'affiliate_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            new_affiliate = Affiliate.objects.get(id=new_affiliate_id, status='approved')
+        except Affiliate.DoesNotExist:
+            return Response({'error': 'Affiliate not found or not approved'}, status=status.HTTP_404_NOT_FOUND)
+            
+        old_affiliate = referral.affiliate
+        referral.affiliate = new_affiliate
+        referral.save(update_fields=['affiliate'])
+        
+        # Also update the related order's referral_code
+        if referral.order:
+            referral.order.referral_code = new_affiliate.affiliate_code
+            referral.order.save(update_fields=['referral_code'])
+        
+        return Response({
+            'message': f'Referral reassigned from {old_affiliate.affiliate_code} to {new_affiliate.affiliate_code}',
+            'referral': AdminReferralSerializer(referral).data
+        })

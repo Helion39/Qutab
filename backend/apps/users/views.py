@@ -33,7 +33,7 @@ class CustomerRegisterView(generics.CreateAPIView):
         refresh = RefreshToken.for_user(user)
         
         return Response({
-            'message': 'Registration successful',
+            'message': 'Registrasi berhasil',
             'user': UserSerializer(user).data,
             'tokens': {
                 'access': str(refresh.access_token),
@@ -72,7 +72,7 @@ class AffiliateRegisterView(generics.CreateAPIView):
             print(f"Failed to send registration emails: {e}")
         
         return Response({
-            'message': 'Affiliate application submitted. Please wait for approval.',
+            'message': 'Pendaftaran affiliator berhasil. Mohon tunggu persetujuan.',
             'user': UserSerializer(user).data,
             'status': 'pending'
         }, status=status.HTTP_201_CREATED)
@@ -90,8 +90,13 @@ class LoginView(APIView):
         password = request.data.get('password')
         
         if not login_identifier or not password:
+            if 'username' in request.data:
+                error_msg = 'ID Admin dan password wajib diisi.'
+            else:
+                error_msg = 'Email dan password wajib diisi.'
+                
             return Response(
-                {'error': 'Admin ID/Email and password are required.'},
+                {'error': error_msg},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -100,14 +105,20 @@ class LoginView(APIView):
         user = authenticate(request, username=login_identifier, password=password)
         
         if user is None:
+            # Different error message based on input type
+            if 'username' in request.data:
+                error_msg = 'ID Admin atau password salah.'
+            else:
+                error_msg = 'Email atau password salah.'
+                
             return Response(
-                {'error': 'Invalid Admin ID or password.'},
+                {'error': error_msg},
                 status=status.HTTP_401_UNAUTHORIZED
             )
         
         if not user.is_active:
             return Response(
-                {'error': 'Account is deactivated.'},
+                {'error': 'Akun dinonaktifkan. Silakan hubungi admin.'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -115,7 +126,7 @@ class LoginView(APIView):
         refresh = RefreshToken.for_user(user)
         
         return Response({
-            'message': 'Login successful',
+            'message': 'Login berhasil',
             'user': UserSerializer(user).data,
             'tokens': {
                 'access': str(refresh.access_token),
@@ -149,7 +160,7 @@ class GoogleLoginView(APIView):
             
             if google_response.status_code != 200:
                 return Response(
-                    {'error': 'Invalid Google token.'},
+                    {'error': 'Gagal verifikasi Google. Silakan login ulang.'},
                     status=status.HTTP_401_UNAUTHORIZED
                 )
                 
@@ -158,7 +169,7 @@ class GoogleLoginView(APIView):
             
             if not email:
                 return Response(
-                    {'error': 'Google account email not found.'},
+                    {'error': 'Email akun Google tidak ditemukan.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
                 
@@ -167,13 +178,13 @@ class GoogleLoginView(APIView):
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
                 return Response(
-                    {'error': 'User not found. Please register first.'},
+                    {'error': 'Akun tidak ditemukan. Silakan daftar terlebih dahulu.'},
                     status=status.HTTP_404_NOT_FOUND
                 )
                 
             if not user.is_active:
                 return Response(
-                    {'error': 'Account is deactivated.'},
+                    {'error': 'Akun dinonaktifkan. Silakan hubungi admin.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
                 
@@ -181,7 +192,7 @@ class GoogleLoginView(APIView):
             refresh = RefreshToken.for_user(user)
             
             return Response({
-                'message': 'Login successful',
+                'message': 'Login berhasil',
                 'user': UserSerializer(user).data,
                 'tokens': {
                     'access': str(refresh.access_token),
@@ -209,9 +220,9 @@ class LogoutView(APIView):
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
-            return Response({'message': 'Logout successful'})
+            return Response({'message': 'Logout berhasil'})
         except Exception:
-            return Response({'message': 'Logout successful'})
+            return Response({'message': 'Logout berhasil'})
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):
@@ -237,14 +248,14 @@ class ChangePasswordView(APIView):
         
         if not user.check_password(serializer.validated_data['current_password']):
             return Response(
-                {'error': 'Current password is incorrect.'},
+                {'error': 'Password saat ini salah.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         user.set_password(serializer.validated_data['new_password'])
         user.save()
         
-        return Response({'message': 'Password changed successfully.'})
+        return Response({'message': 'Password berhasil diubah.'})
 
 
 class AffiliateStatusView(APIView):

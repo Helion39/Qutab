@@ -1,9 +1,21 @@
 """
 Email Templates for Qutab
 """
+import os
 
-# Logo URL - Use production URL for emails
-QUTAB_LOGO_URL = "https://shop.qurbantanpabatas.id/Logo_Qutab.png"
+from django.conf import settings
+
+# Logo Handling
+# If QUTAB_LOGO_URL is not set in .env, we construct the URL from the backend static files.
+# NOTE: In local development (localhost), this image might not load in Gmail because 
+# Gmail servers cannot access your localhost. It will work in production.
+QUTAB_LOGO_URL = os.environ.get('QUTAB_LOGO_URL')
+
+if not QUTAB_LOGO_URL:
+    # Use the Backend URL + Static path
+    # Removes trailing slash from BACKEND_URL if present to avoid double slashes
+    backend_url = settings.BACKEND_URL.rstrip('/')
+    QUTAB_LOGO_URL = f"{backend_url}/static/img/Logo_Qutab.png"
 
 
 def get_otp_email_html(otp_code):

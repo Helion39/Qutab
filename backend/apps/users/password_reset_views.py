@@ -106,7 +106,7 @@ class ResetPasswordView(APIView):
         # Validation
         if not token:
             return Response(
-                {'error': 'Token tidak valid.'},
+                {'error': 'Link reset password tidak valid.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -124,7 +124,7 @@ class ResetPasswordView(APIView):
         
         if new_password != confirm_password:
             return Response(
-                {'error': 'Password dan konfirmasi password tidak sama.'},
+                {'error': 'Password tidak cocok dengan konfirmasi.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -133,7 +133,7 @@ class ResetPasswordView(APIView):
             reset_token = PasswordResetToken.objects.get(token=token)
         except PasswordResetToken.DoesNotExist:
             return Response(
-                {'error': 'Token tidak valid atau sudah kadaluarsa.'},
+                {'error': 'Link reset password tidak valid atau sudah kadaluarsa.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -145,14 +145,30 @@ class ResetPasswordView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Reset password
+        # Get user
         user = reset_token.user
-        user.set_password(new_password)
-        user.save()
         
-        # Mark token as used
-        reset_token.mark_used()
+        # Check if new password is same as current password
+        if user.check_password(new_password):
+            return Response(
+                {'error': 'Gunakan password baru. Password tidak boleh sama dengan yang lama.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        return Response({
-            'message': 'Password berhasil direset. Silakan login dengan password baru.'
-        })
+        # Reset password
+        try:
+            user.set_password(new_password)
+            user.save()
+            
+            # Mark token as used
+            reset_token.mark_used()
+            
+            return Response({
+                'message': 'Password berhasil direset. Silakan login dengan password baru.'
+            })
+        except Exception as e:
+            print(f"Password reset error: {e}")
+            return Response(
+                {'error': 'Gagal mereset password. Silakan coba lagi.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

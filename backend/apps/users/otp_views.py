@@ -30,7 +30,7 @@ class SendOTPView(APIView):
         
         if not email:
             return Response(
-                {'error': 'Email is required'},
+                {'error': 'Email wajib diisi.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -112,7 +112,7 @@ class VerifyOTPView(APIView):
         
         if not email or not otp_code:
             return Response(
-                {'error': 'Email and OTP code are required'},
+                {'error': 'Email dan kode OTP wajib diisi.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -200,7 +200,7 @@ class ResendOTPView(APIView):
         
         if not email:
             return Response(
-                {'error': 'Email is required'},
+                {'error': 'Email wajib diisi.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         

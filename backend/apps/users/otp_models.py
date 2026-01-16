@@ -69,7 +69,7 @@ class EmailOTP(models.Model):
             return False, "Terlalu banyak percobaan. Silakan minta kode baru."
         
         if self.is_verified:
-            return False, "OTP sudah digunakan."
+            return False, "Kode verifikasi ini sudah digunakan."
         
         if self.otp_code != code:
             self.attempts += 1

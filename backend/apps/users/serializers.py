@@ -27,7 +27,7 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError({'password_confirm': 'Passwords do not match.'})
+            raise serializers.ValidationError({'password_confirm': 'Password tidak cocok.'})
         return attrs
     
     def create(self, validated_data):
@@ -80,7 +80,7 @@ class AffiliateRegisterSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError({'password_confirm': 'Passwords do not match.'})
+            raise serializers.ValidationError({'password_confirm': 'Password tidak cocok.'})
         return attrs
     
     def create(self, validated_data):
@@ -140,7 +140,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     
     def validate(self, attrs):
         if attrs['new_password'] != attrs['confirm_password']:
-            raise serializers.ValidationError({'confirm_password': 'Passwords do not match.'})
+            raise serializers.ValidationError({'confirm_password': 'Password tidak cocok.'})
         return attrs
 
 

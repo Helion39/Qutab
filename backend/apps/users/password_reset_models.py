@@ -49,10 +49,10 @@ class PasswordResetToken(models.Model):
     def is_valid(self):
         """Check if token is still valid."""
         if self.is_used:
-            return False, "Token sudah digunakan."
+            return False, "Link reset password ini sudah digunakan. Silakan minta link baru."
         
         if timezone.now() > self.expires_at:
-            return False, "Token sudah kadaluarsa. Silakan minta reset password baru."
+            return False, "Link sudah kadaluarsa. Silakan minta link baru."
         
         return True, "Valid"
     
